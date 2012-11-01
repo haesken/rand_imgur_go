@@ -4,6 +4,7 @@ import (
     "fmt"
     "math/rand"
     "time"
+    "crypto/sha1"
 )
 
 
@@ -40,6 +41,13 @@ func genImgurURL() (string, string) {
     imgurURL := base + imgurName + ".jpg"
 
     return imgurName, imgurURL
+}
+
+// is404gif takes and image and compares its sha1 to imgur's 404 gif.
+// If they are the same it returns true, else false.
+func is404gif(image string) bool {
+    mkSha := sha1.New()
+    // TODO
 }
 
 func main() {
