@@ -3,7 +3,6 @@ package main
 import (
     "crypto/md5"
     "encoding/hex"
-    "fmt"
     "io/ioutil"
     "log"
     "math/rand"
@@ -118,7 +117,7 @@ func findImages(interval int, directory string) {
             // Hash here is the 404 gif's hash.
             if image_hash != "d835884373f4d6c8f24742ceabe74946" {
                 filename := imgurName + "." + filetype
-                fmt.Println("Found image: " + filename)
+                log.Println("Found image: " + filename)
                 writeFile(image, directory, timestamp + " " + filename)
             }
         }
