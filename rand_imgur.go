@@ -9,10 +9,11 @@ import (
     "net/http"
     "os"
     "path"
-    "time"
     "strconv"
-    "github.com/droundy/goopt"
     "strings"
+    "time"
+
+    "github.com/droundy/goopt"
 )
 
 const alphanum string = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -61,11 +62,13 @@ func getUrl(url string) ([]byte, string, error) {
     resp, err := http.Get(url)
     if err != nil {
         log.Printf("http.Get -> %v", err)
+        log.Printf("http.Get -> Continuing...")
     }
 
     contents, err := ioutil.ReadAll(resp.Body)
     if err != nil {
         log.Printf("ioutil.ReadAll -> %v", err)
+        log.Printf("ioutil.ReadAll -> Continuing...")
     }
 
     filetype := strings.Split(resp.Header.Get("content-type"), "/")[1]
@@ -89,10 +92,11 @@ func pathExists(path string) (bool, error) {
 
 // writeFile writes the contents of a byte slice to the specified
 // directory.
-func writeFile(contents []byte, pathDirectory string, filename string) int {
+func writeFile(contents []byte, pathDirectory string, filename string) {
     pathDirectoryExists, err := pathExists(pathDirectory)
     if err != nil {
-        return 1
+        log.Printf("writeFile -> %v", err)
+        log.Printf("writeFile  -> Continuing...")
     }
     if pathDirectoryExists != true {
         os.MkdirAll(pathDirectory, 0777)
@@ -100,9 +104,7 @@ func writeFile(contents []byte, pathDirectory string, filename string) int {
 
     imagePath := path.Join(pathDirectory, filename)
     ioutil.WriteFile(imagePath, contents, 0666)
-    return 0
 }
-
 
 // findImages searches imgur for images. It requests a random image,
 // but only writes it to disk if it is not the 404 gif.
@@ -122,18 +124,16 @@ func findImages(interval int, directory string) {
             }
         }
 
-        // Throttle connects to one per second per thread.
+        // Throttle connections to one per second per thread.
         time.Sleep(time.Duration(interval) * time.Millisecond)
     }
 }
-
 
 func main() {
     rand.Seed(time.Now().UTC().UnixNano())
 
     var interval = goopt.Int([]string{"-i", "--interval"}, 1000,
             "Interval between requests. (Milliseconds)")
-
     var directory = goopt.String([]string{"-d", "--directory"}, "images",
             "Directory to save images to.")
 
