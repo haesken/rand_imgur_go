@@ -121,7 +121,7 @@ func findImages(interval int, directory string) {
         }
 
         // Throttle connects to one per second per thread.
-        time.Sleep(time.Duration(interval) * time.Second)
+        time.Sleep(time.Duration(interval) * time.Millisecond)
     }
 }
 
@@ -129,8 +129,8 @@ func findImages(interval int, directory string) {
 func main() {
     rand.Seed(time.Now().UTC().UnixNano())
 
-    var interval = goopt.Int([]string{"-i", "--interval"}, 1,
-            "Interval between requests.")
+    var interval = goopt.Int([]string{"-i", "--interval"}, 1000,
+            "Interval between requests. (Milliseconds)")
 
     var directory = goopt.String([]string{"-d", "--directory"}, "images",
             "Directory to save images to.")
