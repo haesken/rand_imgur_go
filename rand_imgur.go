@@ -103,16 +103,19 @@ func writeFile(contents []byte, pathDirectory string, filename string) int {
 func main() {
     rand.Seed(time.Now().UTC().UnixNano())
 
-    imgurName, imgurURL := genImgurURL()
-    fmt.Println(imgurURL)
-    image := getUrl(imgurURL)
-    image_hash := hashImage(image)
+    for {
+        imgurName, imgurURL := genImgurURL()
+        fmt.Println(imgurURL)
+        image := getUrl(imgurURL)
+        image_hash := hashImage(image)
 
-    if image_hash != "d835884373f4d6c8f24742ceabe74946" {
-        filename := imgurName + ".jpg"
-        pathDirectory := "images"
-        writeFile(image, pathDirectory, filename)
-    } else {
-        fmt.Println("Found 404 gif!")
+        if image_hash != "d835884373f4d6c8f24742ceabe74946" {
+            fmt.Println("Found image!")
+            filename := imgurName + ".jpg"
+            pathDirectory := "images"
+            writeFile(image, pathDirectory, filename)
+        } else {
+            fmt.Println("Found 404 gif!")
+        }
     }
 }
