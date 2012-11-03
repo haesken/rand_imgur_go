@@ -58,21 +58,21 @@ func hashImage(image []byte) string {
 
 // getUrl fetches a url with a http GET.
 // It returns if the contents and filetype of the the response.
-func getUrl(url string) ([]byte, string) {
+func getUrl(url string) ([]byte, string, error) {
     resp, err := http.Get(url)
     if err != nil {
-        log.Fatalf("http.Get -> %v", err)
+        log.Printf("http.Get -> %v", err)
     }
 
     contents, err := ioutil.ReadAll(resp.Body)
     if err != nil {
-        log.Fatalf("ioutil.ReadAll -> %v", err)
+        log.Printf("ioutil.ReadAll -> %v", err)
     }
 
     filetype := strings.Split(resp.Header.Get("content-type"), "/")[1]
     resp.Body.Close()
 
-    return contents, filetype
+    return contents, filetype, err
 }
 
 // pathExists determines if a file/directory already exists.
@@ -110,16 +110,17 @@ func writeFile(contents []byte, pathDirectory string, filename string) int {
 func findImages(interval int, directory string) {
     for {
         imgurName, imgurURL := genImgurURL()
-        image, filetype := getUrl(imgurURL)
-        image_hash := hashImage(image)
-        timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+        image, filetype, err := getUrl(imgurURL)
+        if err == nil {
+            image_hash := hashImage(image)
+            timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 
-        // Hash here is the 404 gif's hash.
-        if image_hash != "d835884373f4d6c8f24742ceabe74946" {
-            fmt.Println("Found image!")
-            fmt.Println(imgurURL)
-            filename := timestamp + " " + imgurName + "." + filetype
-            writeFile(image, directory, filename)
+            // Hash here is the 404 gif's hash.
+            if image_hash != "d835884373f4d6c8f24742ceabe74946" {
+                filename := imgurName + "." + filetype
+                fmt.Println("Found image: " + filename)
+                writeFile(image, directory, timestamp + " " + filename)
+            }
         }
 
         // Throttle connects to one per second per thread.
