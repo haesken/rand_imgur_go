@@ -12,8 +12,8 @@ import (
     "path"
     "time"
     "strconv"
+    "github.com/droundy/goopt"
 )
-
 
 var alphanum = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
@@ -105,7 +105,7 @@ func writeFile(contents []byte, pathDirectory string, filename string) int {
 
 // findImages searches imgur for images. It requests a random image,
 // but only writes it to disk if it is not the 404 gif.
-func findImages() {
+func findImages(interval int, directory string) {
     for {
         imgurName, imgurURL := genImgurURL()
         image := getUrl(imgurURL)
@@ -117,12 +117,11 @@ func findImages() {
             fmt.Println("Found image!")
             fmt.Println(imgurURL)
             filename := timestamp + " " + imgurName + ".jpg"
-            pathDirectory := "images"
-            writeFile(image, pathDirectory, filename)
+            writeFile(image, directory, filename)
         }
 
         // Throttle connects to one per second per thread.
-        time.Sleep(1 * time.Second)
+        time.Sleep(time.Duration(interval) * time.Second)
     }
 }
 
@@ -130,8 +129,21 @@ func findImages() {
 func main() {
     rand.Seed(time.Now().UTC().UnixNano())
 
-    go findImages()
-    go findImages()
-    go findImages()
-    findImages()
+    var interval = goopt.Int([]string{"-i", "--interval"}, 1,
+            "Interval between requests.")
+
+    var directory = goopt.String([]string{"-d", "--directory"}, "images",
+            "Directory to save images to.")
+
+    goopt.Description = func() string {
+        return "Download random images from imgur"
+    }
+    goopt.Version = "0.0.1"
+    goopt.Summary = "Random imgur downloader"
+    goopt.Parse(nil)
+
+    go findImages(*interval, *directory)
+    go findImages(*interval, *directory)
+    go findImages(*interval, *directory)
+    findImages(*interval, *directory)
 }
