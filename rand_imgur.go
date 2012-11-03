@@ -11,6 +11,7 @@ import (
     "os"
     "path"
     "time"
+    "strconv"
 )
 
 
@@ -100,22 +101,31 @@ func writeFile(contents []byte, pathDirectory string, filename string) int {
     return 0
 }
 
-func main() {
-    rand.Seed(time.Now().UTC().UnixNano())
-
+func findImages() {
     for {
         imgurName, imgurURL := genImgurURL()
-        fmt.Println(imgurURL)
         image := getUrl(imgurURL)
         image_hash := hashImage(image)
+        timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 
         if image_hash != "d835884373f4d6c8f24742ceabe74946" {
             fmt.Println("Found image!")
-            filename := imgurName + ".jpg"
+            fmt.Println(imgurURL)
+            filename := timestamp + " " + imgurName + ".jpg"
             pathDirectory := "images"
             writeFile(image, pathDirectory, filename)
-        } else {
-            fmt.Println("Found 404 gif!")
         }
+
+        time.Sleep(1 * time.Second)
     }
+}
+
+
+func main() {
+    rand.Seed(time.Now().UTC().UnixNano())
+
+    go findImages()
+    go findImages()
+    go findImages()
+    findImages()
 }
