@@ -13,6 +13,7 @@ import (
     "time"
     "strconv"
     "github.com/droundy/goopt"
+    "strings"
 )
 
 const alphanum string = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -56,8 +57,8 @@ func hashImage(image []byte) string {
 }
 
 // getUrl fetches a url with a http GET.
-// It returns if the contents of the the response.
-func getUrl(url string) []byte {
+// It returns if the contents and filetype of the the response.
+func getUrl(url string) ([]byte, string) {
     resp, err := http.Get(url)
     if err != nil {
         log.Fatalf("http.Get -> %v", err)
@@ -68,9 +69,10 @@ func getUrl(url string) []byte {
         log.Fatalf("ioutil.ReadAll -> %v", err)
     }
 
+    filetype := strings.Split(resp.Header.Get("content-type"), "/")[1]
     resp.Body.Close()
 
-    return contents
+    return contents, filetype
 }
 
 // pathExists determines if a file/directory already exists.
@@ -108,7 +110,7 @@ func writeFile(contents []byte, pathDirectory string, filename string) int {
 func findImages(interval int, directory string) {
     for {
         imgurName, imgurURL := genImgurURL()
-        image := getUrl(imgurURL)
+        image, filetype := getUrl(imgurURL)
         image_hash := hashImage(image)
         timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 
@@ -116,7 +118,7 @@ func findImages(interval int, directory string) {
         if image_hash != "d835884373f4d6c8f24742ceabe74946" {
             fmt.Println("Found image!")
             fmt.Println(imgurURL)
-            filename := timestamp + " " + imgurName + ".jpg"
+            filename := timestamp + " " + imgurName + "." + filetype
             writeFile(image, directory, filename)
         }
 
