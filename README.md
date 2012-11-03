@@ -7,8 +7,6 @@ Port of my [original python version](https://github.com/haesken/rand_imgur).
 
 ## Usage
 
-Coming soon...
-
-## Requirements
-
-Builds also coming soon.
+    -i N    --interval=N     Interval between requests in milliseconds.
+    -d DIR  --directory=DIR  Directory to save images to.
+            --help           Show help message.
