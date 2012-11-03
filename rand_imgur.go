@@ -8,6 +8,8 @@ import (
     "log"
     "math/rand"
     "net/http"
+    "os"
+    "path"
     "time"
 )
 
@@ -73,6 +75,31 @@ func getUrl(url string) []byte {
     return contents
 }
 
+func pathExists(path string) (bool, error) {
+    _, err := os.Stat(path)
+    if err == nil {
+        return true, nil
+    }
+    if os.IsNotExist(err) {
+        return false, nil
+    }
+    return false, err
+}
+
+func writeFile(contents []byte, pathDirectory string, filename string) int {
+    pathDirectoryExists, err := pathExists(pathDirectory)
+    if err != nil {
+        return 1
+    }
+    if pathDirectoryExists != true {
+        os.MkdirAll(pathDirectory, 0777)
+    }
+
+    imagePath := path.Join(pathDirectory, filename)
+    ioutil.WriteFile(imagePath, contents, 0666)
+    return 0
+}
+
 func main() {
     rand.Seed(time.Now().UTC().UnixNano())
 
@@ -83,7 +110,8 @@ func main() {
 
     if image_hash != "d835884373f4d6c8f24742ceabe74946" {
         filename := imgurName + ".jpg"
-        ioutil.WriteFile(filename, image, 0666)
+        pathDirectory := "images"
+        writeFile(image, pathDirectory, filename)
     } else {
         fmt.Println("Found 404 gif!")
     }
