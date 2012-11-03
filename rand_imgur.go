@@ -15,7 +15,7 @@ import (
     "github.com/droundy/goopt"
 )
 
-var alphanum = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+const alphanum string = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 // randInt generates a random int between a set minimum and maximum
 func randInt(min int, max int) int {
