@@ -1,10 +1,14 @@
 package main
 
 import (
+    "crypto/md5"
+    "encoding/hex"
     "fmt"
+    "io/ioutil"
+    "log"
     "math/rand"
+    "net/http"
     "time"
-    "crypto/sha1"
 )
 
 
@@ -43,14 +47,44 @@ func genImgurURL() (string, string) {
     return imgurName, imgurURL
 }
 
-// is404gif takes and image and compares its sha1 to imgur's 404 gif.
-// If they are the same it returns true, else false.
-func is404gif(image string) bool {
-    mkSha := sha1.New()
-    // TODO
+// hashImage takes and image takes a md5 hash of it.
+// It returns a string containing the hex representation of the hash.
+func hashImage(image []byte) string {
+    hasher := md5.New()
+    hasher.Write(image)
+    return hex.EncodeToString(hasher.Sum(nil))
+}
+
+
+// getUrl fetches a url with a http GET.
+// It returns if the contents of the the response.
+func getUrl(url string) []byte {
+    resp, err := http.Get(url)
+    if err != nil {
+        log.Fatalf("http.Get -> %v", err)
+    }
+
+    contents, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        log.Fatalf("ioutil.ReadAll -> %v", err)
+    }
+
+    resp.Body.Close()
+    return contents
 }
 
 func main() {
     rand.Seed(time.Now().UTC().UnixNano())
-    fmt.Println(genImgurURL())
+
+    imgurName, imgurURL := genImgurURL()
+    fmt.Println(imgurURL)
+    image := getUrl(imgurURL)
+    image_hash := hashImage(image)
+
+    if image_hash != "d835884373f4d6c8f24742ceabe74946" {
+        filename := imgurName + ".jpg"
+        ioutil.WriteFile(filename, image, 0666)
+    } else {
+        fmt.Println("Found 404 gif!")
+    }
 }
