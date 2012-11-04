@@ -38,7 +38,7 @@ func randString(length int, charset string) string {
 // It returns the "name" of the image (five randomized alphanumeric characters)
 // and the respective url for that image.
 func genImgurURL() (string, string) {
-	base := "http://www.imgur.com/"
+	base := "http://i.imgur.com/"
 	imgurName := randString(5, alphanum)
 	// Note: if the image hosted at imgur is not actually a jpg,
 	// imgur will respond with the image anyway.
