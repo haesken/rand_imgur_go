@@ -59,22 +59,24 @@ func hashImage(image []byte) string {
 // getUrl fetches a url with a http GET.
 // It returns if the contents and filetype of the the response.
 func getUrl(url string) ([]byte, string, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Printf("http.Get -> %v", err)
+	resp, httpErr := http.Get(url)
+	if httpErr != nil {
+		log.Printf("http.Get -> %v", httpErr)
 		log.Printf("http.Get -> Continuing...")
+		return nil, "", httpErr
 	}
 
-	contents, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("ioutil.ReadAll -> %v", err)
+	contents, fileErr := ioutil.ReadAll(resp.Body)
+	if fileErr != nil {
+		log.Printf("ioutil.ReadAll -> %v", fileErr)
 		log.Printf("ioutil.ReadAll -> Continuing...")
+		return nil, "", fileErr
 	}
 
 	filetype := strings.Split(resp.Header.Get("content-type"), "/")[1]
 	resp.Body.Close()
 
-	return contents, filetype, err
+	return contents, filetype, nil
 }
 
 // pathExists determines if a file/directory already exists.
