@@ -110,19 +110,21 @@ func writeFile(contents []byte, pathDirectory string, filename string) {
 
 // findImages searches imgur for images. It requests a random image,
 // but only writes it to disk if it is not the 404 gif.
-func findImages(interval int, directory string) {
+func findImages(interval int, directory string, threadNum int) {
 	for {
 		imgurName, imgurURL := genImgurURL()
 		image, filetype, err := getUrl(imgurURL)
 		if err == nil {
 			image_hash := hashImage(image)
 			timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+			filename := imgurName + "." + filetype
 
 			// Hash here is the 404 gif's hash.
 			if image_hash != "d835884373f4d6c8f24742ceabe74946" {
-				filename := imgurName + "." + filetype
-				log.Println("Found image: " + filename)
+				log.Printf("| Thread: %d | Found: %s", threadNum, filename)
 				writeFile(image, directory, timestamp+" "+filename)
+			} else {
+				log.Printf("| Thread: %d | Found: 404 gif", threadNum)
 			}
 		}
 
@@ -136,6 +138,8 @@ func main() {
 
 	var interval = goopt.Int([]string{"-i", "--interval"}, 1000,
 		"Interval between requests. (Milliseconds)")
+	var connections = goopt.Int([]string{"-c", "--connections"}, 4,
+		"Number of simultanious connections.")
 	var directory = goopt.String([]string{"-d", "--directory"}, "images",
 		"Directory to save images to.")
 
@@ -146,8 +150,9 @@ func main() {
 	goopt.Summary = "Random imgur downloader"
 	goopt.Parse(nil)
 
-	go findImages(*interval, *directory)
-	go findImages(*interval, *directory)
-	go findImages(*interval, *directory)
-	findImages(*interval, *directory)
+	// Create requested number of connections.
+	for threadNum := 1; threadNum < *connections; threadNum++ {
+		go findImages(*interval, *directory, threadNum)
+	}
+	findImages(*interval, *directory, 0)
 }
