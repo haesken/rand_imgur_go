@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 	"time"
 
@@ -116,11 +115,10 @@ func findImages(interval int, directory string, threadNum int) {
 		image, filetype, err := getUrl(imgurURL)
 		if err == nil {
 			image_hash := hashImage(image)
-			timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-			filename := imgurName + "." + filetype
-
 			// Hash here is the 404 gif's hash.
 			if image_hash != "d835884373f4d6c8f24742ceabe74946" {
+				timestamp := time.Now().Format("2006-01-02 15-04-05")
+				filename := imgurName + "." + filetype
 				log.Printf("| Thread: %d | Found: %s", threadNum, filename)
 				writeFile(image, directory, timestamp+" "+filename)
 			} else {
@@ -133,10 +131,12 @@ func findImages(interval int, directory string, threadNum int) {
 	}
 }
 
+// main handles parsing command line arguments and spawning instances of
+// findImages()
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	var interval = goopt.Int([]string{"-i", "--interval"}, 1000,
+	var interval = goopt.Int([]string{"-i", "--interval"}, 2000,
 		"Interval between requests. (Milliseconds)")
 	var connections = goopt.Int([]string{"-c", "--connections"}, 4,
 		"Number of simultanious connections.")
