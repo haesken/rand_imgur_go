@@ -137,11 +137,11 @@ func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	var interval = goopt.Int([]string{"-i", "--interval"}, 2000,
-		"Interval between requests. (Milliseconds)")
+		"Milliseconds between requests per connection")
 	var connections = goopt.Int([]string{"-c", "--connections"}, 4,
-		"Number of simultanious connections.")
+		"Number of simultanious connections")
 	var directory = goopt.String([]string{"-d", "--directory"}, "images",
-		"Directory to save images to.")
+		"Directory to save images to")
 
 	goopt.Description = func() string {
 		return "Download random images from imgur"
