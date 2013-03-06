@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -44,15 +42,6 @@ func genImgurURL() (string, string) {
 	imgurURL := base + imgurName + ".jpg"
 
 	return imgurName, imgurURL
-}
-
-// hashImage takes and image takes a md5 hash of it.
-// It returns a string containing the hex representation of the hash.
-func hashImage(image []byte) string {
-	hasher := md5.New()
-	hasher.Write(image)
-
-	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 // getUrl fetches a url with a http GET.
@@ -112,20 +101,17 @@ func writeFile(contents []byte, pathDirectory string, filename string) {
 func findImages(interval int, directory string, threadNum int) {
 	for {
 		imgurName, imgurURL := genImgurURL()
-		image, filetype, err := getUrl(imgurURL)
+		response, filetype, err := getUrl(imgurURL)
 		if err == nil {
-			image_hash := hashImage(image)
-			// Hash here is the 404 gif's hash.
-			if image_hash != "d835884373f4d6c8f24742ceabe74946" {
+			if filetype != "html" {
 				timestamp := time.Now().Format("2006-01-02 15-04-05")
 				filename := imgurName + "." + filetype
-				log.Printf("| Thread: %d | Found: %s", threadNum, filename)
-				writeFile(image, directory, timestamp+" "+filename)
+				log.Printf("| Thread: %d | %s", threadNum, filename)
+				writeFile(response, directory, timestamp+" "+filename)
 			} else {
-				log.Printf("| Thread: %d | Found: 404 gif", threadNum)
+				log.Printf("| Thread: %d | 404", threadNum)
 			}
 		}
-
 		// Throttle connections to one per second per thread.
 		time.Sleep(time.Duration(interval) * time.Millisecond)
 	}
